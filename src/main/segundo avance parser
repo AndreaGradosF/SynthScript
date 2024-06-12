@@ -1,0 +1,12 @@
+grammar Language;
+
+programa
+    : declaracion*
+    ;
+
+declaracion
+    : declaracion_de_nota
+    | declaracion_de_pausa
+    | declaracion_de_secuencia
+    | declaracion_de_reproduccion
+    ;
