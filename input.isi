@@ -1,0 +1,10 @@
+programa
+nota mi_nota1 = nota(C, 1s, 4o);
+pausa mi_pausa1 = pausa(2s);
+secuencia mi_secuencia1 = [mi_nota1, mi_pausa1];
+reproducir(mi_secuencia1);
+bucle(3)
+    nota mi_nota2 = nota(G, 0.5s, 5o);
+    reproducir(mi_nota2);
+finbucle
+finprog
