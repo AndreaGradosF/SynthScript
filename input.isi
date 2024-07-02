@@ -1,38 +1,40 @@
+//Fragmento de la melodía Fly Me To The Moon» de Bart Howard.
 programa
-    nota mi_nota1 = nota(C, 1s, 4o);
-    nota mi_nota2 = nota(D, 0.5s, 4o);
-    nota mi_nota3 = nota(E, 1s, 4o);
-    nota mi_nota4 = nota(F, 0.5s, 4o);
-    nota mi_nota5 = nota(G, 1s, 5o);
-    nota mi_nota6 = nota(A, 0.5s, 5o);
-    nota mi_nota7 = nota(B, 1s, 5o);
-    nota mi_nota8 = nota(C, 0.5s, 5o);
+    nota mi_nota1 = nota(E, 1s, 4o);   // Fly
+    nota mi_nota2 = nota(A, 1s, 4o);   // me
+    nota mi_nota3 = nota(B, 1s, 4o);   // to
+    nota mi_nota4 = nota(A, 1s, 4o);   // the
+    nota mi_nota5 = nota(G, 2s, 4o);  // moon
 
-    pausa mi_pausa1 = pausa(1s);
-    pausa mi_pausa2 = pausa(0.5s);
+    nota mi_nota6 = nota(F, 1s, 4o);  // Let
+    nota mi_nota7 = nota(E, 1s, 4o);   // me
+    nota mi_nota8 = nota(D, 1s, 4o);   // play
+    nota mi_nota9 = nota(C, 1s, 4o);  // among
+    nota mi_nota10 = nota(B, 2s, 4o);  // the stars
 
-    secuencia mi_secuencia1 = [mi_nota1, mi_pausa1, mi_nota2, mi_pausa2, mi_nota3];
-    secuencia mi_secuencia2 = [mi_nota4, mi_nota5, mi_pausa2, mi_nota6, mi_nota7];
-    secuencia mi_secuencia3 = [mi_nota8, mi_pausa1, mi_nota6, mi_nota4, mi_pausa2];
+    nota mi_nota11 = nota(A, 1s, 4o);  // Let
+    nota mi_nota12 = nota(G, 1s, 4o); // me
+    nota mi_nota13 = nota(F, 1s, 4o); // see
+    nota mi_nota14 = nota(E, 1s, 4o);  // what
+    nota mi_nota15 = nota(D, 2s, 4o);  // spring
 
-    reproducir(mi_secuencia1);
-    reproducir(mi_secuencia2);
-    
-    bucle(2)
-        reproducir(mi_secuencia3);
-    finbucle
+    nota mi_nota16 = nota(C, 1s, 4o); // is
+    nota mi_nota17 = nota(B, 1s, 4o);  // like
+    nota mi_nota18 = nota(A, 1s, 4o);  // on
+    nota mi_nota19 = nota(G, 1s, 4o); // Jupiter
+    nota mi_nota20 = nota(F, 2s, 4o); // and Mars
 
-    bucle(3)
-        nota mi_nota9 = nota(D, 0.75s, 4o);
-        pausa mi_pausa3 = pausa(0.25s);
-        secuencia mi_secuencia4 = [mi_nota9, mi_pausa3, mi_nota8];
-        reproducir(mi_secuencia4);
-    finbucle
+    // Declaración de pausas
+    pausa mi_pausa1 = pausa(0.5s);
+    pausa mi_pausa2 = pausa(1s);
 
-    nota mi_nota10 = nota(E, 0.5s, 5o);
-    pausa mi_pausa4 = pausa(1.5s);
+    secuencia coro = [
+        mi_nota1, mi_nota2, mi_nota3, mi_nota4, mi_nota5, mi_pausa1,
+        mi_nota6, mi_nota7, mi_nota8, mi_nota9, mi_nota10, mi_pausa2,
+        mi_nota11, mi_nota12, mi_nota13, mi_nota14, mi_nota15, mi_pausa1,
+        mi_nota16, mi_nota17, mi_nota18, mi_nota19, mi_nota20
+    ];
 
-    secuencia mi_secuencia5 = [mi_nota10, mi_pausa4, mi_nota1, mi_pausa2];
-    reproducir(mi_secuencia5);
+    reproducir(coro);
 
 finprog
