@@ -26,5 +26,8 @@ public class Main {
         ParseTree tree = parser.programa();
 
         System.out.println(tree.toStringTree(parser));
+
+        LanguageVisitorExt visitor = new LanguageVisitorExt();
+        visitor.visit(tree);
     }
 }

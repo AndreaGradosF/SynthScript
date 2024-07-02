@@ -1,14 +1,12 @@
-import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
-
+import javax.sound.sampled.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LanguageVisitor extends AbstractParseTreeVisitor<Void> implements LanguageBaseVisitor<Void> {
-
-    private final Map<String, Nota> notas = new HashMap<>();
-    private final Map<String, Pausa> pausas = new HashMap<>();
-    private final Map<String, List<SecuenciaElemento>> secuencias = new HashMap<>();
+public class LanguageVisitorExt extends LanguageBaseVisitor<Void> {
+    private final Map<String, Note> notes = new HashMap<>();
+    private final Map<String, List<String>> sequences = new HashMap<>();
 
     @Override
     public Void visitPrograma(LanguageParser.ProgramaContext ctx) {
@@ -29,89 +27,69 @@ public class LanguageVisitor extends AbstractParseTreeVisitor<Void> implements L
     @Override
     public Void visitDeclaracion_de_nota(LanguageParser.Declaracion_de_notaContext ctx) {
         String id = ctx.ID().getText();
-        String tono = ctx.tono().getText();
-        String duracion = ctx.duracion().getText();
-        String octava = ctx.octava().getText();
+        String tone = ctx.tono().getText();
+        float duration = Float.parseFloat(ctx.duracion().getText().replace("s", ""));
+        int octave = Integer.parseInt(ctx.octava().getText().replace("o", ""));
 
-        Nota nota = new Nota(tono, duracion, octava);
-        notas.put(id, nota);
-
-        System.out.println("Nota declarada: " + id + " = " + nota);
+        notes.put(id, new Note(tone, duration, octave));
+        System.out.println("Nota añadida: " + id);
         return null;
     }
 
     @Override
     public Void visitDeclaracion_de_pausa(LanguageParser.Declaracion_de_pausaContext ctx) {
         String id = ctx.ID().getText();
-        String duracion = ctx.duracion().getText();
+        float duration = Float.parseFloat(ctx.duracion().getText().replace("s", ""));
 
-        Pausa pausa = new Pausa(duracion);
-        pausas.put(id, pausa);
-
-        System.out.println("Pausa declarada: " + id + " = " + pausa);
+        // Añadir pausa como una nota silenciosa (frecuencia 0)
+        notes.put(id, new Note("C", duration, 0));
+        System.out.println("Pausa añadida: " + id);
         return null;
     }
 
     @Override
     public Void visitDeclaracion_de_secuencia(LanguageParser.Declaracion_de_secuenciaContext ctx) {
         String id = ctx.ID().getText();
-        List<SecuenciaElemento> elementos = ctx.elemento_secuencia().stream()
-                .map(elemento -> {
-                    if (elemento.ID() != null) {
-                        String elementoId = elemento.ID().getText();
-                        if (notas.containsKey(elementoId)) {
-                            return new SecuenciaElemento(notas.get(elementoId));
-                        } else if (pausas.containsKey(elementoId)) {
-                            return new SecuenciaElemento(pausas.get(elementoId));
-                        } else {
-                            throw new RuntimeException("Elemento no declarado: " + elementoId);
-                        }
-                    } else {
-                        throw new RuntimeException("Elemento no válido en secuencia");
-                    }
-                })
-                .toList();
-
-        secuencias.put(id, elementos);
-
-        System.out.println("Secuencia declarada: " + id + " = " + elementos);
+        List<String> elements = new ArrayList<>();
+        for (LanguageParser.Elemento_secuenciaContext elem : ctx.elemento_secuencia()) {
+            elements.add(elem.ID().getText());
+        }
+        sequences.put(id, elements);
+        System.out.println("Secuencia añadida: " + id);
         return null;
     }
 
     @Override
     public Void visitDeclaracion_de_reproduccion(LanguageParser.Declaracion_de_reproduccionContext ctx) {
         String id = ctx.ID().getText();
-
-        if (notas.containsKey(id)) {
-            System.out.println("Reproduciendo nota: " + notas.get(id));
-        } else if (pausas.containsKey(id)) {
-            System.out.println("Reproduciendo pausa: " + pausas.get(id));
-        } else if (secuencias.containsKey(id)) {
-            System.out.println("Reproduciendo secuencia: " + id);
-            secuencias.get(id).forEach(elemento -> {
-                if (elemento.isNota()) {
-                    System.out.println("Reproduciendo nota: " + elemento.getNota());
-                } else if (elemento.isPausa()) {
-                    System.out.println("Reproduciendo pausa: " + elemento.getPausa());
+        if (notes.containsKey(id)) {
+            Note note = notes.get(id);
+            playTone(note.getFrequency(), note.getDuration());
+            System.out.println("Reproduciendo nota: " + id);
+        } else if (sequences.containsKey(id)) {
+            List<String> sequence = sequences.get(id);
+            for (String noteId : sequence) {
+                Note note = notes.get(noteId);
+                if (note != null) {
+                    playTone(note.getFrequency(), note.getDuration());
+                    System.out.println("Reproduciendo nota: " + noteId);
+                } else {
+                    System.err.println("Nota no encontrada en secuencia: " + noteId);
                 }
-            });
+            }
         } else {
-            throw new RuntimeException("Elemento no declarado: " + id);
+            System.err.println("Nota o secuencia no encontrada: " + id);
         }
-
         return null;
     }
 
     @Override
     public Void visitDeclaracion_de_bucle(LanguageParser.Declaracion_de_bucleContext ctx) {
-        int iteraciones = Integer.parseInt(ctx.NUMERO().getText());
-        System.out.println("Iniciando bucle con " + iteraciones + " iteraciones");
-
-        for (int i = 0; i < iteraciones; i++) {
-            visitChildren(ctx.bloque());
+        int repetitions = Integer.parseInt(ctx.NUMERO().getText());
+        for (int i = 0; i < repetitions; i++) {
+            visit(ctx.bloque());
         }
-
-        System.out.println("Finalizando bucle");
+        System.out.println("Bucle ejecutado " + repetitions + " veces.");
         return null;
     }
 
@@ -130,81 +108,46 @@ public class LanguageVisitor extends AbstractParseTreeVisitor<Void> implements L
         return visitChildren(ctx);
     }
 
-    private static class Nota {
-        private final String tono;
-        private final String duracion;
-        private final String octava;
-
-        public Nota(String tono, String duracion, String octava) {
-            this.tono = tono;
-            this.duracion = duracion;
-            this.octava = octava;
-        }
-
-        @Override
-        public String toString() {
-            return "Nota{" +
-                    "tono='" + tono + '\'' +
-                    ", duracion='" + duracion + '\'' +
-                    ", octava='" + octava + '\'' +
-                    '}';
-        }
-    }
-
-    private static class Pausa {
-        private final String duracion;
-
-        public Pausa(String duracion) {
-            this.duracion = duracion;
-        }
-
-        @Override
-        public String toString() {
-            return "Pausa{" +
-                    "duracion='" + duracion + '\'' +
-                    '}';
-        }
-    }
-
-    private static class SecuenciaElemento {
-        private final Nota nota;
-        private final Pausa pausa;
-
-        public SecuenciaElemento(Nota nota) {
-            this.nota = nota;
-            this.pausa = null;
-        }
-
-        public SecuenciaElemento(Pausa pausa) {
-            this.nota = null;
-            this.pausa = pausa;
-        }
-
-        public boolean isNota() {
-            return nota != null;
-        }
-
-        public boolean isPausa() {
-            return pausa != null;
-        }
-
-        public Nota getNota() {
-            return nota;
-        }
-
-        public Pausa getPausa() {
-            return pausa;
-        }
-
-        @Override
-        public String toString() {
-            if (isNota()) {
-                return nota.toString();
-            } else if (isPausa()) {
-                return pausa.toString();
-            } else {
-                return "Elemento no válido";
+    private void playTone(double frequency, float duration) {
+        try {
+            float sampleRate = 44100;
+            int bufferSize = (int) (sampleRate * duration);
+            byte[] buf = new byte[bufferSize];
+            for (int i = 0; i < buf.length; i++) {
+                double angle = 2.0 * Math.PI * i / (sampleRate / frequency);
+                buf[i] = (byte) (Math.sin(angle) * 127);
             }
+
+            AudioFormat af = new AudioFormat(sampleRate, 8, 1, true, true);
+            SourceDataLine sdl = AudioSystem.getSourceDataLine(af);
+            sdl.open(af);
+            sdl.start();
+            sdl.write(buf, 0, buf.length);
+            sdl.drain();
+            sdl.close();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class Note {
+        private final String tone;
+        private final float duration;
+        private final int octave;
+
+        public Note(String tone, float duration, int octave) {
+            this.tone = tone;
+            this.duration = duration;
+            this.octave = octave;
+        }
+
+        public double getFrequency() {
+            int noteIndex = "CDEFGAB".indexOf(tone.charAt(0));
+            return 440.0 * Math.pow(2, (noteIndex - 9 + (octave - 4) * 12) / 12.0);
+        }
+
+        public float getDuration() {
+            return duration;
         }
     }
 }
