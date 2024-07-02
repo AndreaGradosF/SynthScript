@@ -1,10 +1,38 @@
 programa
-nota mi_nota1 = nota(C, 1s, 4o);
-pausa mi_pausa1 = pausa(2s);
-secuencia mi_secuencia1 = [mi_nota1, mi_pausa1];
-reproducir(mi_secuencia1);
-bucle(3)
-    nota mi_nota2 = nota(G, 0.5s, 5o);
-    reproducir(mi_nota2);
-finbucle
+    nota mi_nota1 = nota(C, 1s, 4o);
+    nota mi_nota2 = nota(D, 0.5s, 4o);
+    nota mi_nota3 = nota(E, 1s, 4o);
+    nota mi_nota4 = nota(F, 0.5s, 4o);
+    nota mi_nota5 = nota(G, 1s, 5o);
+    nota mi_nota6 = nota(A, 0.5s, 5o);
+    nota mi_nota7 = nota(B, 1s, 5o);
+    nota mi_nota8 = nota(C, 0.5s, 5o);
+
+    pausa mi_pausa1 = pausa(1s);
+    pausa mi_pausa2 = pausa(0.5s);
+
+    secuencia mi_secuencia1 = [mi_nota1, mi_pausa1, mi_nota2, mi_pausa2, mi_nota3];
+    secuencia mi_secuencia2 = [mi_nota4, mi_nota5, mi_pausa2, mi_nota6, mi_nota7];
+    secuencia mi_secuencia3 = [mi_nota8, mi_pausa1, mi_nota6, mi_nota4, mi_pausa2];
+
+    reproducir(mi_secuencia1);
+    reproducir(mi_secuencia2);
+    
+    bucle(2)
+        reproducir(mi_secuencia3);
+    finbucle
+
+    bucle(3)
+        nota mi_nota9 = nota(D, 0.75s, 4o);
+        pausa mi_pausa3 = pausa(0.25s);
+        secuencia mi_secuencia4 = [mi_nota9, mi_pausa3, mi_nota8];
+        reproducir(mi_secuencia4);
+    finbucle
+
+    nota mi_nota10 = nota(E, 0.5s, 5o);
+    pausa mi_pausa4 = pausa(1.5s);
+
+    secuencia mi_secuencia5 = [mi_nota10, mi_pausa4, mi_nota1, mi_pausa2];
+    reproducir(mi_secuencia5);
+
 finprog
